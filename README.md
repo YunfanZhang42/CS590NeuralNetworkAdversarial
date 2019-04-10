@@ -1,1 +1,1 @@
-# CS590Meltdown
+# CS590 Neural Network Adversarial
