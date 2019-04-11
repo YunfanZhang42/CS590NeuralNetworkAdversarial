@@ -78,7 +78,19 @@ def deprocess(img, should_rescale=True):
     ])
     return transform(img)
 
-X, y, class_names = load_imagenet_val(num=100)
+def rescale(x):
+    low, high = x.min(), x.max()
+    x_rescaled = (x - low) / (high - low)
+    return x_rescaled
+
+
+def get_results(scores):
+    X, y, class_names = load_imagenet_val(num=100)
+
+    index = scores.data.max(1)[1][0].item()
+    scores = scores.data.numpy()[0]
+    confidence = np.exp(scores[index])/np.sum(np.exp(scores))
+    return class_names[index], confidence
 
 def fool(img, target):
     model = torchvision.models.squeezenet1_1(pretrained=True)
@@ -87,16 +99,35 @@ def fool(img, target):
 
     X_tensor = torch.cat([preprocess(img)], dim=0)
     X_fooling = make_fooling_image(X_tensor, target, model)
+
+    original = model(X_tensor)
     scores = model(X_fooling)
+
     assert target == scores.data.max(1)[1][0].item(), 'The model is not fooled!'
 
-def load_image():
-    img = Image.open('images/dog.png')
+    n1, c1 = get_results(original)
+    n2, c2 = get_results(scores)
+    diff = deprocess(X_fooling - X_tensor, should_rescale=False)
+    diff10 = deprocess(10 * (X_fooling - X_tensor), should_rescale=False)
+    return {
+        'original_res': n1,
+        'original_conf': c1,
+        'fooled_res': n1,
+        'fooled_conf': c1,
+        'diff': diff,
+        'diff10': diff10,
+        'fooled_img': deprocess(X_fooling.clone()),
+    }
+
+def load_image(url):
+    img = Image.open(url)
     return img
 
-def save_Image():
+def save_Image_from_imagenet():
+    X, y, class_names = load_imagenet_val(num=100)
     img = Image.fromarray(X[3], 'RGB')
     img.save("3.png")
 
-# save_Image()
-fool(load_image(), 100)
+# Usage: pass in an image and the target index you want to confuse with
+new_img = fool(load_image('images/dog.png'), 10)['diff10']
+new_img.save("difference_10times.png")
