@@ -1,14 +1,12 @@
-import os
 import torch
 import torchvision
 import torchvision.transforms as T
-import random
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter1d
 from PIL import Image
 
 SQUEEZENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 SQUEEZENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+
 
 def make_fooling_image(X, target_y, model):
     """
@@ -47,8 +45,9 @@ def make_fooling_image(X, target_y, model):
         X_fooling.requires_grad_()
     return X_fooling
 
+
 def load_imagenet_val(num=None):
-    imagenet_fn = 'imagenet_val_25.npz'
+    imagenet_fn = 'NeuralNet/imagenet_val_25.npz'
     f = np.load(imagenet_fn)
     X = f['X']
     y = f['y']
@@ -57,6 +56,7 @@ def load_imagenet_val(num=None):
         X = X[:num]
         y = y[:num]
     return X, y, class_names
+
 
 def preprocess(img, size=224):
     transform = T.Compose([
@@ -68,6 +68,7 @@ def preprocess(img, size=224):
     ])
     return transform(img)
 
+
 def deprocess(img, should_rescale=True):
     transform = T.Compose([
         T.Lambda(lambda x: x[0]),
@@ -77,6 +78,7 @@ def deprocess(img, should_rescale=True):
         T.ToPILImage(),
     ])
     return transform(img)
+
 
 def rescale(x):
     low, high = x.min(), x.max()
@@ -89,8 +91,9 @@ def get_results(scores):
 
     index = scores.data.max(1)[1][0].item()
     scores = scores.data.numpy()[0]
-    confidence = np.exp(scores[index])/np.sum(np.exp(scores))
+    confidence = np.exp(scores[index]) / np.sum(np.exp(scores))
     return class_names[index], confidence
+
 
 def fool(img, target):
     model = torchvision.models.squeezenet1_1(pretrained=True)
@@ -112,22 +115,25 @@ def fool(img, target):
     return {
         'original_res': n1,
         'original_conf': c1,
-        'fooled_res': n1,
-        'fooled_conf': c1,
+        'fooled_res': n2,
+        'fooled_conf': c2,
         'diff': diff,
         'diff10': diff10,
         'fooled_img': deprocess(X_fooling.clone()),
     }
 
+
 def load_image(url):
     img = Image.open(url)
     return img
+
 
 def save_Image_from_imagenet():
     X, y, class_names = load_imagenet_val(num=100)
     img = Image.fromarray(X[3], 'RGB')
     img.save("3.png")
 
+
 # Usage: pass in an image and the target index you want to confuse with
-new_img = fool(load_image('images/dog.png'), 10)['diff10']
-new_img.save("difference_10times.png")
+# new_img = fool(load_image('images/dog.png'), 10)['diff10']
+# new_img.save("difference_10times.png")
