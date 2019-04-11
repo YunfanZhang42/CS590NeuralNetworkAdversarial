@@ -112,8 +112,8 @@ def fool(img, target):
     return {
         'original_res': n1,
         'original_conf': c1,
-        'fooled_res': n1,
-        'fooled_conf': c1,
+        'fooled_res': n2,
+        'fooled_conf': c2,
         'diff': diff,
         'diff10': diff10,
         'fooled_img': deprocess(X_fooling.clone()),
@@ -125,9 +125,17 @@ def load_image(url):
 
 def save_Image_from_imagenet():
     X, y, class_names = load_imagenet_val(num=100)
-    img = Image.fromarray(X[3], 'RGB')
-    img.save("3.png")
+    img = Image.fromarray(X[12], 'RGB')
+    img.save("1.png")
 
 # Usage: pass in an image and the target index you want to confuse with
-new_img = fool(load_image('images/dog.png'), 10)['diff10']
-new_img.save("difference_10times.png")
+# save_Image_from_imagenet()
+index = 0
+images = fool(load_image('images/ship.png'), 999)
+images['diff10'].save(str(index)+"-diff10.png")
+images['diff'].save(str(index)+"-diff.png")
+images['fooled_img'].save(str(index)+"-fooled.png")
+print(images['original_res'])
+print(images['original_conf'])
+print(images['fooled_res'])
+print(images['fooled_conf'])
