@@ -1,1 +1,1 @@
-# CS590 Neural Network Adversarial
+# CS590 Neural Network Adversarial Attack
