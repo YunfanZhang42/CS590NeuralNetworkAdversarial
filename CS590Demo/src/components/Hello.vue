@@ -15,11 +15,11 @@
         </b-col>
         <b-col>
           <b-img thumbnail fluid :src=noiseURL alt="Image 2"></b-img>
-          <h3>Added Noise</h3>
+          <h3>Gradient Ascent</h3>
         </b-col>
         <b-col>
           <b-img thumbnail fluid :src=noise10xURL alt="Image 2"></b-img>
-          <h3>Added Noise 10x</h3>
+          <h3>Gradient Ascent 10x</h3>
         </b-col>
         <b-col>
           <b-img thumbnail fluid :src=transformedURL alt="Image 3"></b-img>
